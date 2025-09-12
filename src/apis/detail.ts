@@ -1,6 +1,6 @@
 import api from './index';
 
-interface PostingResponse {
+export interface PostingResponse {
   id: number;
   title: string;
   category:
@@ -9,7 +9,6 @@ interface PostingResponse {
     | 'EDUCATION'
     | 'HOUSING'
     | 'EMPLOYMENT'
-    | 'EDUCATION'
     | 'LIFE_SUPPORT';
   sourceUrl: string;
   applyStartAt: string | null;
@@ -19,23 +18,23 @@ interface PostingResponse {
   isPeriodLimited: boolean;
   detail: string;
 }
+
+// 공고 상세 조회 API
 export const getPostingDetail = async (
   postingId: number,
 ): Promise<PostingResponse | null> => {
   const onboardingInfo = JSON.parse(
     localStorage.getItem('onboardingInfo') || '{}',
   );
-  console.log(onboardingInfo.nation);
 
   try {
     const response = await api.get<PostingResponse>(
       `/api/postings/${postingId}`,
       { params: { language: onboardingInfo.nation } },
     );
-    if (response.data) return response.data;
-    return null; // null 반환
+    return response.data ?? null;
   } catch (error) {
-    console.error(error);
+    console.error('[getPostingDetail ERROR]', error);
     return null;
   }
 };
