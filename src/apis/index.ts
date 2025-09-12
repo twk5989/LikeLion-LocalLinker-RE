@@ -1,8 +1,7 @@
 import axios from 'axios';
+import { BASE_URL } from './config';
 
-// .env에 REACT_APP_BASE_URL 없으면 기본 로컬주소 사용
-const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
-
+// axios 공용 인스턴스 생성
 const api = axios.create({
   baseURL: BASE_URL,
   headers: {
