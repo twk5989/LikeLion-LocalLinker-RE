@@ -1,9 +1,11 @@
-// //  타입 + 매핑
+//타입 + 매핑
 
+
+//프론트에서 사용하는 타입 
 export type Notice = {
   id: string;
-  category: string; // 한글 라벨(교육, 의료 등)
-  type: string; // tags 한글 + (조건부) '기간제'
+  category: string;
+  type: string;
   title: string;
   dept: string;
   period: string;
@@ -12,7 +14,7 @@ export type Notice = {
   isPeriodLimited?: boolean;
 };
 
-// ==== 백엔드 응답 타입 & 매핑 유틸(①) ====
+//백엔드에서 오는 원본 데이터 타입
 export type BackendNotice = {
   id: number;
   title: string;
@@ -32,6 +34,8 @@ export type BackendNotice = {
   isPeriodLimited: boolean;
 };
 
+
+//영문-> 한글 변환 매핑
 const CATEGORY_KO: Record<string, string> = {
   ADMINISTRATION: '행정',
   MEDICAL: '의료',
@@ -47,7 +51,7 @@ const TAG_KO: Record<'BENEFIT' | 'SYSTEM' | 'PROGRAM', string> = {
   PROGRAM: '프로그램',
 };
 
-// YY.MM.DD 포맷
+//2025-09-12 00:00:000 이거를 25.09.12 형태로 변경해줌
 function fmtDate(iso: string): string {
   const d = new Date(iso); // ISO가 로컬로 파싱
   const yy = String(d.getFullYear() % 100).padStart(2, '0');
@@ -56,6 +60,7 @@ function fmtDate(iso: string): string {
   return `${yy}.${mm}.${dd}`;
 }
 
+//시작,종료일에 대한 데이터를 문자열로 가공
 function buildPeriod(start: string | null, end: string | null): string {
   if (!start && !end) return '상시';
   if (start && end) return `${fmtDate(start)}~${fmtDate(end)}`;
@@ -63,6 +68,8 @@ function buildPeriod(start: string | null, end: string | null): string {
   return `미정~${fmtDate(end!)}`;
 }
 
+//여기가 가장 중요.
+//백엔드에서 온 BackendNotice를 프론트 전용 Notice로 변환
 export function mapBackendToNotice(dto: BackendNotice): Notice {
   const categoryKo = CATEGORY_KO[dto.category] ?? dto.category;
   const tagKo = dto.tags ? TAG_KO[dto.tags] : '';
@@ -80,7 +87,7 @@ export function mapBackendToNotice(dto: BackendNotice): Notice {
   };
 }
 
+// 백엔드의 BackendNotic e배열을 Notice 배열로 전환
 export function mapBackendList(list: BackendNotice[]): Notice[] {
   return list.map(mapBackendToNotice);
 }
-// data/notices.ts 내
