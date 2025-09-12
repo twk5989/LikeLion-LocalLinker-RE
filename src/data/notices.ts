@@ -1,56 +1,5 @@
 //타입 + 매핑
 
-
-//프론트에서 사용하는 타입 
-export type Notice = {
-  id: string;
-  category: string;
-  type: string;
-  title: string;
-  dept: string;
-  period: string;
-  isNew?: boolean;
-  isDueSoon?: boolean;
-  isPeriodLimited?: boolean;
-};
-
-//백엔드에서 오는 원본 데이터 타입
-export type BackendNotice = {
-  id: number;
-  title: string;
-  category:
-    | 'ADMINISTRATION'
-    | 'MEDICAL'
-    | 'HOUSING'
-    | 'EMPLOYMENT'
-    | 'EDUCATION'
-    | 'LIFE_SUPPORT';
-  organization: string | null;
-  sourceUrl: string | null;
-  applyStartAt: string | null;
-  applyEndAt: string | null;
-  eligibility: string | null;
-  tags: 'BENEFIT' | 'SYSTEM' | 'PROGRAM' | null;
-  isPeriodLimited: boolean;
-};
-
-
-//영문-> 한글 변환 매핑
-const CATEGORY_KO: Record<string, string> = {
-  ADMINISTRATION: '행정',
-  MEDICAL: '의료',
-  HOUSING: '주거',
-  EMPLOYMENT: '취업/근로',
-  EDUCATION: '교육',
-  LIFE_SUPPORT: '생활 지원',
-};
-
-const TAG_KO: Record<'BENEFIT' | 'SYSTEM' | 'PROGRAM', string> = {
-  BENEFIT: '혜택',
-  SYSTEM: '제도',
-  PROGRAM: '프로그램',
-};
-
 //2025-09-12 00:00:000 이거를 25.09.12 형태로 변경해줌
 function fmtDate(iso: string): string {
   const d = new Date(iso); // ISO가 로컬로 파싱
