@@ -1,12 +1,19 @@
-// src/hooks/useLatest.ts
 import * as React from 'react';
-import type { BackendNotice, Notice } from '../data/notices';
-import { mapBackendList } from '../data/notices';
-import { collectAllCategories, latestScore } from '../utils/postings';
+import api from '../apis';
+import { mapBackendList } from '../mappers/notice';
+import { latestScore } from '../utils/postings';
+import type { BackendNotice, Notice } from '../types/notices';
 
 type LatestFilters = {
-  visa?: string; // D_2 / E_7 … (언더스코어). nation/married 제외(UI-only)
+  visa?: string;
 };
+
+async function fetchLatest(pageSize: number, maxPages: number, visa?: string) {
+  const res = await api.get<BackendNotice[]>('/api/postings/latest', {
+    params: { size: pageSize, page: 0, visa },
+  });
+  return res.data;
+}
 
 export function useLatest(pageSize = 200, maxPages = 50, filters?: LatestFilters) {
   const [list, setList] = React.useState<Notice[]>([]);
@@ -18,29 +25,21 @@ export function useLatest(pageSize = 200, maxPages = 50, filters?: LatestFilters
     (async () => {
       try {
         setLoading(true);
-        setError(null);
-
-        const raw: BackendNotice[] = await collectAllCategories(
-          pageSize,
-          maxPages,
-          filters?.visa,
-        );
-
+        const raw = await fetchLatest(pageSize, maxPages, filters?.visa);
         if (cancelled) return;
         const sorted = raw.sort((a, b) => latestScore(b) - latestScore(a));
         setList(mapBackendList(sorted));
-        setLoading(false);
       } catch (e: any) {
-        if (cancelled) return;
-        setError(e?.message ?? String(e));
+        if (!cancelled) setError(e?.message ?? String(e));
         setList([]);
-        setLoading(false);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [pageSize, maxPages, filters?.visa]); // visa만 의존
+  }, [pageSize, maxPages, filters?.visa]);
 
   return { list, loading, error };
 }
