@@ -1,3 +1,4 @@
+//전역 스타일
 import { css } from '@emotion/react';
 
 const globalStyles = css`

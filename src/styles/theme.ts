@@ -1,3 +1,5 @@
+//전역 스타일 them 정의
+
 const theme = {
   colors: {
     surface: {
