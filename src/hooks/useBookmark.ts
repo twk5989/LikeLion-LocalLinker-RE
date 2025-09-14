@@ -1,4 +1,7 @@
-import { useState, useEffect } from 'react';
+//북마크 기능을 로컬 스토리지와 연결해 유지(서버와 통신 필요X)
+//localStorage로 새로고침을해도 북마크가 유지됨
+
+import { useState} from 'react';
 
 const LOCAL_STORAGE_KEY = 'bookmarkedIds';
 
