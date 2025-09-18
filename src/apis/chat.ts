@@ -1,3 +1,4 @@
+//간략화 잘 되어있음
 import api from './index';
 
 interface ChatRequest {
