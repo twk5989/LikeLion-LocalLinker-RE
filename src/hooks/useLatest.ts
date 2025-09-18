@@ -1,3 +1,5 @@
+//마감 임박공고 훅
+
 import * as React from 'react';
 import api from '../apis';
 import { mapBackendList } from '../mappers/notice';
