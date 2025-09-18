@@ -1,5 +1,5 @@
-// 비자: 예: E-7 → E_7
-// 국적: 국가명이 아니라 언어코드(KO, EN, UZ, JA, ZH, TH, VI)
+//비자: 예: E-7 → E_7
+//국적: 국가명이 아니라 언어코드(KO, EN, UZ, JA, ZH, TH, VI)
 
 export const VISA_OPTIONS: readonly { label: string; value: string }[] = [
   { label: '단기 취업(C-4)', value: 'C_4' },
