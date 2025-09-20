@@ -12,7 +12,7 @@ export function qs(o: Record<string, any>) {
   return u.toString();
 }
 
-// 응답 배열 안전하게 꺼내기(useDue)
+// 응답 배열 안전하게 꺼내기(useDue)-> 응답 언팩
 export function unpackArray(res: any) {
   if (Array.isArray(res)) return res;
   if (Array.isArray(res?.items)) return res.items;
