@@ -14,7 +14,7 @@ import { useLatest } from '../../hooks/useLatest';
 import { useDue } from '../../hooks/useDue';
 import Fallback from '../../components/common/Fallback';
 
-import { useBookmark } from '../../hooks/useBookmark';
+import { useBookmark } from '../../hooks/Bookmark';
 
 export default function MainPage() {
   const { list: latest, loading: lLoading, error: lError } = useLatest(50);

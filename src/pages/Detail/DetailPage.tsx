@@ -4,7 +4,7 @@ import type { DetailPageProps } from './DetailPage.types';
 import bookmarket from '../../assets/icons/bookmarket.svg';
 import bookmarketFill from '../../assets/icons/bookmark_fill.svg';
 import { useParams } from 'react-router-dom';
-import { useBookmark } from '../../hooks/useBookmark';
+import { useBookmark } from '../../hooks/Bookmark';
 import { getPostingDetail } from '../../apis/detail';
 
 const formatDate = (dateString: string) => {

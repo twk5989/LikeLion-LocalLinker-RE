@@ -7,7 +7,7 @@ import {
   type BackendNotice,
   type Notice,
 } from '../../data/notices';
-import { useBookmark } from '../../hooks/useBookmark';
+import { useBookmark } from '../../hooks/Bookmark';
 import { fetchJSON } from '../../apis/api'; // ← 모크 없는 실제 fetch
 import { useNavigate } from 'react-router-dom';
 
