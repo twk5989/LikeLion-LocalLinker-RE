@@ -6,7 +6,7 @@ import Pager from '../../components/Pager/Pager';
 import FabChat from '../../components/FabChat';
 import * as L from './CategoryPage.styles';
 import CategoryTabs from '../../components/CategoryTabs/CategoryTabs';
-import Fallback from '../../components/common/Fallback';
+import Fallback from '../../components/Common/Fallback';
 
 import type { CategoryCode } from '../../types/category';
 import {

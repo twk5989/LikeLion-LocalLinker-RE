@@ -1,4 +1,4 @@
-import type { Notice } from '../../data/notices';
+import type { Notice } from '../../types/notices';
 import type { MouseEvent } from 'react';
 
 export type NoticeCardProps = Notice & {

@@ -3,7 +3,7 @@ import Layout from '../../layouts/layout';
 import Pager from '../../components/Pager/Pager';
 import NoticeCard from '../../components/Card/NoticeCard';
 import { useDue } from '../../hooks/Due';
-import Fallback from '../../components/common/Fallback';
+import Fallback from '../../components/Common/Fallback';
 import { useNavigate } from 'react-router-dom';
 
 const PAGE_SIZE = 6;
