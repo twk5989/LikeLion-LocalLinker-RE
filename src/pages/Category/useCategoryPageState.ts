@@ -8,7 +8,7 @@ import {
   isCategoryCode,
 } from '../../types/category';
 
-import { useCategoryResults } from '../../hooks/useCategoryResults';
+import { useCategoryResults } from '../../hooks/CategoryResults';
 import { sortNotices } from '../../components/SortButtons/sort';
 import type { SortKey } from '../../components/SortButtons/SortButtons.types';
 

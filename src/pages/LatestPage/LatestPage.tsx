@@ -3,7 +3,7 @@ import React from 'react';
 import Layout from '../../layouts/layout';
 import Pager from '../../components/Pager/Pager';
 import NoticeCard from '../../components/Card/NoticeCard';
-import { useLatest } from '../../hooks/useLatest';
+import { useLatest } from '../../hooks/Latest';
 import Fallback from '../../components/common/Fallback';
 import FilterPanel from '../../components/FilterPanel/FilterPanel';
 import PersonSwitch from '../../components/PersonSwitch/PersonSwitch';

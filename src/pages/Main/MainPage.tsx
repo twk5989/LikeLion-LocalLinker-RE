@@ -10,8 +10,8 @@ import {
 import NoticeCard from '../../components/Card/NoticeCard';
 import { useNavigate } from 'react-router-dom';
 import FabChat from '../../components/FabChat';
-import { useLatest } from '../../hooks/useLatest';
-import { useDue } from '../../hooks/useDue';
+import { useLatest } from '../../hooks/Latest';
+import { useDue } from '../../hooks/Due';
 import Fallback from '../../components/common/Fallback';
 
 import { useBookmark } from '../../hooks/Bookmark';

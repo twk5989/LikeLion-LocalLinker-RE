@@ -16,7 +16,7 @@ import {
 } from '../../types/category';
 import { CATEGORY_ORDER } from '../../constants/categories';
 import { VISA_OPTIONS, NATIONALITIES } from '../../constants/onboardingOptions';
-import { useCategoryResults } from '../../hooks/useCategoryResults';
+import { useCategoryResults } from '../../hooks/CategoryResults';
 
 import FilterPanel from '../../components/FilterPanel/FilterPanel';
 import PersonSwitch from '../../components/PersonSwitch/PersonSwitch';
