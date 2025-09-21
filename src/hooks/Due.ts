@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { mockOrApiGet } from '../apis';            //목업/실서버 토글 지원
-import { unpackArray } from '../utils/query';      //응답 배열 안전 언팩
-import { dueScore } from '../utils/dateScore';     //종료일 기준 점수
+import { mockOrApiGet } from '../apis';            // 목업,실서버 토글 지원
+import { unpackArray } from '../utils/query';      // 응답 배열 안전 언팩
+import { dueScore } from '../utils/dateScore';     // 종료일 기준 점수
 import { mapBackendList } from '../mappers/notice';
 import type { BackendNotice, Notice } from '../types/notices';
 
