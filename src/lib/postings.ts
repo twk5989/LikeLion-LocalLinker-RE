@@ -1,5 +1,6 @@
 //카테고리/다국어 수집기가 필요 할 때에만 사용하는 헬퍼
 //정렬,포맷,쿼리 유틸은 utyils에 단일화 되어있음
+//쉽게 정리하면 백엔드에서 받아온 카테고리별 데이터를 카테고리 상관없이 그냥 싹 다 합친다는거임
 
 import { mockOrApiGet } from '../apis';
 import { CATEGORY_ORDER } from '../constants/categories';
