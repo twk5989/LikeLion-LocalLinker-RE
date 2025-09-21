@@ -12,7 +12,7 @@ import { sortNotices } from '../../components/SortButtons/sort';
 import type { SortKey } from '../../components/SortButtons/SortButtons.types';
 import { VISA_OPTIONS, NATIONALITIES } from '../../constants/onboardingOptions';
 import { loadOnboardingFilters } from '../../utils/onboarding';
-import { normalizeVisa } from '../../utils/shared';
+import { normalizeVisa } from '../../utils/visa';
 import type { FilterFormState, LatestPageProps } from './LatestPage.types';
 import * as L from './LatestPage.styles';
 import { useNavigate } from 'react-router-dom';

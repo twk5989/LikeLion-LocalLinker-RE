@@ -3,7 +3,7 @@
 import * as React from 'react';
 import api from '../apis';
 import { mapBackendList } from '../mappers/notice';
-import { latestScore } from '../utils/postings';
+import { latestScore } from '../utils/dateScore';
 import type { BackendNotice, Notice } from '../types/notices';
 
 type LatestFilters = {

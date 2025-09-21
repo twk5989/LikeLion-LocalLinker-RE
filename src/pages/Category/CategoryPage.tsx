@@ -25,7 +25,7 @@ import { sortNotices } from '../../components/SortButtons/sort';
 import type { SortKey } from '../../components/SortButtons/SortButtons.types';
 
 import { loadOnboardingFilters, type MarriedStr } from '../../utils/onboarding';
-import { normalizeVisa } from '../../utils/shared';
+import { normalizeVisa } from '../../utils/visa';
 
 const DEBUG = true;
 const PAGE_SIZE = 6;
