@@ -1,23 +1,26 @@
-//마감 임박공고 훅
-
+// src/hooks/useLatest.ts
 import * as React from 'react';
-import api from '../apis';
-import { mapBackendList } from '../mappers/notice';
-import { latestScore } from '../utils/dateScore';
-import type { BackendNotice, Notice } from '../types/notices';
+import { mockOrApiGet } from '../apis';
+import type { Notice } from '../types/notices';
+import { periodStartTs } from '../utils/dates'; // "YY.MM.DD~..."에서 시작일 timestamp 추출
 
-type LatestFilters = {
-  visa?: string;
-};
+type LatestFilters = { visa?: string };
 
-async function fetchLatest(pageSize: number, maxPages: number, visa?: string) {
-  const res = await api.get<BackendNotice[]>('/api/postings/latest', {
-    params: { size: pageSize, page: 0, visa },
-  });
-  return res.data;
+// 시작일 기준 “현재와의 차” 점수 (작을수록 최신에 가까움)
+function latestScoreFromPeriod(period: string): number {
+  const t = periodStartTs(period);
+  return Number.isFinite(t) ? Math.abs(t - Date.now()) : Number.POSITIVE_INFINITY;
 }
 
-export function useLatest(pageSize = 200, maxPages = 50, filters?: LatestFilters) {
+async function fetchLatest(size: number, visa?: string) {
+  const res = await mockOrApiGet<Notice[]>('/api/postings/latest', {
+    params: { size, page: 0, visa },
+  });
+  // 목업/실서버 공통으로 Notice[] 반환한다고 가정
+  return Array.isArray(res) ? res : [];
+}
+
+export function useLatest(size = 20, filters?: LatestFilters) {
   const [list, setList] = React.useState<Notice[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -27,13 +30,21 @@ export function useLatest(pageSize = 200, maxPages = 50, filters?: LatestFilters
     (async () => {
       try {
         setLoading(true);
-        const raw = await fetchLatest(pageSize, maxPages, filters?.visa);
-        if (cancelled) return;
-        const sorted = raw.sort((a, b) => latestScore(b) - latestScore(a));
-        setList(mapBackendList(sorted));
+        setError(null);
+
+        const raw = await fetchLatest(size, filters?.visa);
+
+        // 시작일 존재 + 현재 기준 가까운 순
+        const sorted = raw
+          .filter((n) => Number.isFinite(periodStartTs(n.period)))
+          .sort((a, b) => latestScoreFromPeriod(a.period) - latestScoreFromPeriod(b.period));
+
+        if (!cancelled) setList(sorted);
       } catch (e: any) {
-        if (!cancelled) setError(e?.message ?? String(e));
-        setList([]);
+        if (!cancelled) {
+          setError(e?.message ?? String(e));
+          setList([]);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -41,7 +52,7 @@ export function useLatest(pageSize = 200, maxPages = 50, filters?: LatestFilters
     return () => {
       cancelled = true;
     };
-  }, [pageSize, maxPages, filters?.visa]);
+  }, [size, filters?.visa]);
 
   return { list, loading, error };
 }

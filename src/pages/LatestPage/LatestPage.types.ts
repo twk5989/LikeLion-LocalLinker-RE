@@ -8,5 +8,4 @@ export type FilterFormState = {
 
 export interface LatestPageProps {
   pageSize?: number;
-  maxPages?: number;
 }

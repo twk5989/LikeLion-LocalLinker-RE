@@ -1,6 +1,6 @@
 // 정렬 로직
 import * as React from 'react';
-import type { Notice } from '../../data/notices';
+import type { Notice } from '../../types/notices';
 import {
   periodEndTs,
   periodStartTs,

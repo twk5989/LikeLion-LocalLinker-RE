@@ -1,5 +1,4 @@
-import { normalizeVisa } from '../../utils/shared';
-
+import { normalizeVisa } from '../../utils/visa'
 // 언더스코어 포맷으로 강제 (예: D_2, E_7)
 export const toVisaParam = (visaValue?: string): string | undefined => {
   if (!visaValue) return undefined;

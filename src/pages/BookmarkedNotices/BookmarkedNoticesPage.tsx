@@ -2,18 +2,26 @@
 import React from 'react';
 import * as S from './BookmarkedNoticesPage.styles';
 import NoticeCard from '../../components/Card/NoticeCard';
-import {
-  mapBackendList,
-  type BackendNotice,
-  type Notice,
-} from '../../data/notices';
+import { mapBackendList } from '../../mappers/notice';
+import type { BackendNotice, Notice } from '../../types/notices';
 import { useBookmark } from '../../hooks/Bookmark';
-import { fetchJSON } from '../../apis/api'; // ← 모크 없는 실제 fetch
+import { mockOrApiGet } from '../../apis';        // ✅ axios 래퍼
+import { unpackArray } from '../../utils/query';  // ✅ 응답 배열 안전 추출
 import { useNavigate } from 'react-router-dom';
+
+async function fetchLatestBulk(limit = 300) {
+  // ✅ axios (mock/real 토글은 .env)
+  const res = await mockOrApiGet('/api/postings/latest', {
+    params: { limit }, // 서버가 size/page면 { size: limit, page: 0 }로 바꿔도 됨
+  });
+  // mockOrApiGet은 data(=payload)를 반환하므로 res.data가 아님에 주의
+  return unpackArray(res) as BackendNotice[];
+}
 
 export default function BookmarkedNoticesPage() {
   const navigate = useNavigate();
   const { bookmarkedIds, toggleBookmark } = useBookmark();
+
   const [list, setList] = React.useState<Notice[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -23,49 +31,36 @@ export default function BookmarkedNoticesPage() {
   };
 
   React.useEffect(() => {
-    const ac = new AbortController();
+    let cancelled = false;
 
-    // 북마크가 없으면 요청 안 함
     if (!bookmarkedIds || bookmarkedIds.length === 0) {
       setList([]);
       setLoading(false);
       setError(null);
-      return () => ac.abort();
+      return () => { cancelled = true; };
     }
-
-    setLoading(true);
-    setError(null);
 
     (async () => {
       try {
-        // 서버에서 넉넉히 가져온 뒤 북마크로 필터
-        const res: any = await fetchJSON('/api/postings/latest?limit=300', {
-          signal: ac.signal,
-        });
-        console.log(res);
-        const payload = Array.isArray(res)
-          ? res
-          : (res?.data ?? res?.content ?? res?.list ?? []);
-        const arr: BackendNotice[] = Array.isArray(payload) ? payload : [];
+        setLoading(true);
+        setError(null);
 
-        const all = mapBackendList(arr); // BackendNotice[] -> Notice[]
-        const bookmarked = all.filter((n) =>
-          bookmarkedIds.includes(String(n.id)),
-        );
+        const raw = await fetchLatestBulk(300);
+        const all = mapBackendList(raw);
+        const bookmarked = all.filter((n) => bookmarkedIds.includes(String(n.id)));
 
-        if (!ac.signal.aborted) {
-          setList(bookmarked);
-          setLoading(false);
-        }
+        if (!cancelled) setList(bookmarked);
       } catch (e: any) {
-        if (e?.name === 'AbortError') return; // 개발모드 StrictMode에서 정상
-        setError(e?.message ?? String(e));
-        setList([]);
-        setLoading(false);
+        if (!cancelled) {
+          setError(e?.message ?? String(e));
+          setList([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     })();
 
-    return () => ac.abort();
+    return () => { cancelled = true; };
   }, [bookmarkedIds]);
 
   return (

@@ -27,7 +27,6 @@ const toVisaParam = (visaValue?: string): string | undefined => {
 
 export default function LatestPage({
   pageSize = 200,
-  maxPages = 50,
 }: LatestPageProps) {
   const navigate = useNavigate();
   const [sortKey, setSortKey] = React.useState<SortKey>('due');
@@ -48,9 +47,7 @@ export default function LatestPage({
 
   const visaParam = toVisaParam(active.visa); // 서버엔 비자만 전달
 
-  const { list, loading, error } = useLatest(pageSize, maxPages, {
-    visa: visaParam,
-  });
+  const { list, loading, error } = useLatest(pageSize, { visa: visaParam });
 
   const sorted = React.useMemo(
     () => sortNotices(list, sortKey),

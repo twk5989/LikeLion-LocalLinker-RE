@@ -11,7 +11,7 @@ const PAGE_SIZE = 6;
 export default function DuePage() {
   const navigate = useNavigate();
 
-  const { list: notices, loading, error } = useDue(200, 50);
+  const { list: notices, loading, error } = useDue(200);
   const [page, setPage] = React.useState(1);
 
   const total = notices.length;
