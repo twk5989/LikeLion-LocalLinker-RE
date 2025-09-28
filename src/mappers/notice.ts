@@ -3,7 +3,7 @@ import { buildPeriod } from '../utils/date';
 import type { BackendNotice, Notice } from '../types/notices';
 
 
-//여기가 가장 중요.
+//사실상 필요없음. 백엔드->프론트로 변환을 할 필요가 없음
 //백엔드에서 온 BackendNotice를 프론트 전용 Notice로 변환.
 export function mapBackendToNotice(dto: BackendNotice): Notice {
   return {
