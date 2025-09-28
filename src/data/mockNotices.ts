@@ -1,4 +1,3 @@
-// 목업 데이터 파일 위치
 
 import type { Notice } from '../types/notices';
 
