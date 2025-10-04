@@ -2,19 +2,16 @@
 import React from 'react';
 import * as S from './BookmarkedNoticesPage.styles';
 import NoticeCard from '../../components/Card/NoticeCard';
-import { mapBackendList } from '../../mappers/notice';
-import type { BackendNotice, Notice } from '../../types/notices';
+import type { BackendNotice } from '../../types/notices';
 import { useBookmark } from '../../hooks/Bookmark';
-import { mockOrApiGet } from '../../apis';        // ✅ axios 래퍼
-import { unpackArray } from '../../utils/query';  // ✅ 응답 배열 안전 추출
+import { mockOrApiGet } from '../../apis';
+import { unpackArray } from '../../utils/query';
 import { useNavigate } from 'react-router-dom';
 
 async function fetchLatestBulk(limit = 300) {
-  // ✅ axios (mock/real 토글은 .env)
-  const res = await mockOrApiGet('/api/postings/latest', {
-    params: { limit }, // 서버가 size/page면 { size: limit, page: 0 }로 바꿔도 됨
+  const res = await mockOrApiGet<BackendNotice[]>('/api/postings/latest', {
+    params: { limit },
   });
-  // mockOrApiGet은 data(=payload)를 반환하므로 res.data가 아님에 주의
   return unpackArray(res) as BackendNotice[];
 }
 
@@ -22,12 +19,12 @@ export default function BookmarkedNoticesPage() {
   const navigate = useNavigate();
   const { bookmarkedIds, toggleBookmark } = useBookmark();
 
-  const [list, setList] = React.useState<Notice[]>([]);
+  const [list, setList] = React.useState<BackendNotice[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  const handleCardClick = (id: string | number) => {
-    navigate(`/detail/${Number(id)}`);
+  const handleCardClick = (id: number) => {
+    navigate(`/detail/${id}`); // id는 number
   };
 
   React.useEffect(() => {
@@ -46,8 +43,9 @@ export default function BookmarkedNoticesPage() {
         setError(null);
 
         const raw = await fetchLatestBulk(300);
-        const all = mapBackendList(raw);
-        const bookmarked = all.filter((n) => bookmarkedIds.includes(String(n.id)));
+
+        // bookmarkedIds가 string[]일 가능성 큼 → 문자열화해서 비교
+        const bookmarked = raw.filter((n) => bookmarkedIds.includes(String(n.id)));
 
         if (!cancelled) setList(bookmarked);
       } catch (e: any) {
@@ -75,11 +73,11 @@ export default function BookmarkedNoticesPage() {
             <S.ListContainer>
               {list.map((n) => (
                 <NoticeCard
-                  key={n.id}
-                  {...n}
+                  key={String(n.id)}                       // key는 문자열 권장
+                  notice={n}                                // ✅ BackendNotice 단일 prop
                   bookmarked={true}
-                  onToggleBookmark={() => toggleBookmark(n.id)}
-                  onClick={() => handleCardClick(n.id)}
+                  onToggleBookmark={(_next) => toggleBookmark(String(n.id))} // 문자열화
+                  onClick={() => handleCardClick(n.id)}     // id는 number
                 />
               ))}
             </S.ListContainer>
