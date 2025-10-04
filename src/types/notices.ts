@@ -1,4 +1,3 @@
-//프론트에서 사용하는 타입이거 그냥 지움
 
 //백엔드에서 오는 원본 데이터 타입
 export type BackendNotice = {

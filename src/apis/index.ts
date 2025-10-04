@@ -1,79 +1,124 @@
 // src/apis/index.ts
 import axios from 'axios';
-import { mockNotices, mockLatestNotices, mockDueSoonNotices } from '../data/mockNotices';
 import { BASE_URL } from './config';
-import { NATIONALITIES } from '../constants/onboardingOptions'; // 국적 옵션 사용 (value만 씀)
+import mockNoticesDefault, { mockNotices as mockNoticesNamed } from '../data/mockNotices';
 
-const USE_MOCK = process.env.REACT_APP_USE_MOCK === 'true';
+// CRA/webpack, Vite 둘 다 대응 (하나만 쓰면 그 한 줄만 남겨도 됨)
+const USE_MOCK =
+  (typeof process !== 'undefined' && process.env?.REACT_APP_USE_MOCK === 'true') ||
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_USE_MOCK === 'true');
 
-// ✅ axios 공용 인스턴스 (이게 없으면 api.get에서 에러)
-const api = axios.create({
+// 공용 axios 인스턴스 생성
+export const api = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 
-// =======================
-//  목업 전용 헬퍼
-// =======================
-const VISA_POOL = ['C_4','D_2','D_4','D_10','E_2','E_7','E_9','F_1','F_2','F_3','F_4','F_5','F_6','H_2','G_1'];
-const NATION_POOL = NATIONALITIES.map(n => n.value); // 예: 'ko','en','zh'...
+// ---------- 내부 유틸 ----------
+type NoticeLike = {
+  id: number;
+  visa?: string | null;
+  nationality?: string | null;
+  applyEndAt?: string | null;
+  [k: string]: any;
+};
 
-function numericId(id: string | number) {
-  const s = String(id);
-  const m = s.match(/\d+/g);
-  if (m && m.length) return Number(m.join('')) || 0;
-  // 숫자 없으면 해시처럼 문자코드 합
-  let acc = 0;
-  for (let i = 0; i < s.length; i++) acc = (acc * 131 + s.charCodeAt(i)) >>> 0;
-  return acc;
+// data-mockNotices.ts 가 default 또는 named export 둘 중 하나일 수 있어 안전하게 합치기
+const ALL_MOCK: NoticeLike[] = Array.isArray(mockNoticesDefault)
+  ? mockNoticesDefault
+  : Array.isArray(mockNoticesNamed)
+  ? mockNoticesNamed
+  : [];
+
+// 필터 적용 (visa, nationality, keyword(optional))
+function applyFilters<T extends NoticeLike>(
+  list: T[],
+  params: Record<string, any> = {}
+): T[] {
+  const visa = params.visa ?? null;
+  // nation / nationality 어느 키로 들어와도 지원 (과거 호환)
+  const nationality = params.nationality ?? params.nation ?? null;
+  const keyword = (params.keyword ?? '').toString().trim().toLowerCase();
+
+  return list.filter((n) => {
+    // keyword: title + organization에 포함되면 통과 (옵션)
+    if (keyword) {
+      const hay = `${n.title ?? ''} ${n.organization ?? ''}`.toLowerCase();
+      if (!hay.includes(keyword)) return false;
+    }
+    // visa: 목업에 visa가 없거나 null이면 전체 허용, 값이 있으면 정확히 일치해야
+    if (visa) {
+      if (n.visa && n.visa !== visa) return false;
+    }
+    // nationality: 동일 규칙
+    if (nationality) {
+      if (n.nationality && n.nationality !== nationality) return false;
+    }
+    return true;
+  });
 }
 
-export function mockVisaForId(id: string | number) {
-  const idx = numericId(id) % VISA_POOL.length;
-  return VISA_POOL[idx];
+function sortByClosingSoon<T extends NoticeLike>(list: T[]): T[] {
+  // applyEndAt 오름차순 (가까운 마감일 먼저)
+  return [...list].sort((a, b) => {
+    const ta = a.applyEndAt ? Date.parse(a.applyEndAt) : Number.POSITIVE_INFINITY;
+    const tb = b.applyEndAt ? Date.parse(b.applyEndAt) : Number.POSITIVE_INFINITY;
+    return ta - tb;
+  });
 }
 
-export function mockNationForId(id: string | number) {
-  const idx = numericId(id) % NATION_POOL.length;
-  return NATION_POOL[idx];
-}
-
-// =======================
-//  GET (mock 또는 실제 API)
-// =======================
+// ---------- 공개 API(모의 또는 실제) ----------
 export type GetOptions = {
   params?: Record<string, any>;
   signal?: AbortSignal;
 };
 
 export async function mockOrApiGet<T>(url: string, options?: GetOptions): Promise<T> {
-  if (USE_MOCK) {
-    const params = options?.params ?? {};
-    const visa = params.visa as string | undefined;
-    const nation = params.nation as string | undefined;
-
-    console.log('[MOCK] GET', url, params);
-
-    if (url.includes('/api/postings/latest')) {
-      let list = [...mockLatestNotices];
-      if (visa)  list = list.filter(n => mockVisaForId(n.id)   === visa);
-      if (nation) list = list.filter(n => mockNationForId(n.id) === nation);
-      return list as T;
-    }
-
-    if (url.includes('/api/postings/closing-soon')) {
-      let list = [...mockDueSoonNotices];
-      if (visa)  list = list.filter(n => mockVisaForId(n.id)   === visa);
-      if (nation) list = list.filter(n => mockNationForId(n.id) === nation);
-      return list as T;
-    }
-
-    return mockNotices as T;
+  if (!USE_MOCK) {
+    const res = await api.get<T>(url, options as any);
+    return res.data;
   }
 
-  // 실제 API
-  const res = await api.get<T>(url, options as any);
-  return res.data;
+  // ✅ MOCK 경로
+  const params = options?.params ?? {};
+  const filtered = applyFilters(ALL_MOCK, params);
+
+  // 라우트별 응답 흉내
+  if (url.includes('/api/postings/latest')) {
+    // 최신: 일단 필터만 적용, limit 적용
+    const limit = Number(params.limit ?? 10);
+    return filtered.slice(0, limit) as unknown as T;
+  }
+
+  if (url.includes('/api/postings/closing-soon')) {
+    // 마감 임박: 마감일 정렬 + limit
+    const limit = Number(params.limit ?? 10);
+    return sortByClosingSoon(filtered).slice(0, limit) as unknown as T;
+  }
+
+  if (url.includes('/api/postings/category')) {
+    // 카테고리별: category 파라미터가 들어온다고 가정
+    const category = (params.category ?? '').toString().toUpperCase();
+    const page = Number(params.page ?? 0);
+    const size = Number(params.size ?? 10);
+    const pageStart = page * size;
+
+    const list = filtered.filter(
+      (n) => (n.category ?? '').toString().toUpperCase() === category
+    );
+    const content = list.slice(pageStart, pageStart + size);
+
+    // 백엔드의 페이징 응답 형태를 단순 흉내 (필요 시 너가 맞춰서 수정)
+    return {
+      content,
+      total: list.length,
+      page,
+      size,
+    } as unknown as T;
+  }
+
+  // 기본: 전체 반환 (필요 시 페이지네이션 추가)
+  return filtered as unknown as T;
 }
 
 export default api;
