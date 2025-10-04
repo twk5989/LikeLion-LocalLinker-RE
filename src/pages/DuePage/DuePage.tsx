@@ -1,3 +1,4 @@
+// src/pages/Due/DuePage.tsx  (경로는 네 프로젝트 구조에 맞게)
 import React from 'react';
 import Layout from '../../layouts/layout';
 import Pager from '../../components/Pager/Pager';
@@ -11,6 +12,7 @@ const PAGE_SIZE = 6;
 export default function DuePage() {
   const navigate = useNavigate();
 
+  // useDue는 BackendNotice[]를 반환한다고 가정 (마감 임박 정렬/필터 포함)
   const { list: notices, loading, error } = useDue(200);
   const [page, setPage] = React.useState(1);
 
@@ -19,7 +21,7 @@ export default function DuePage() {
   const start = (page - 1) * PAGE_SIZE;
   const current = notices.slice(start, start + PAGE_SIZE);
 
-  // 데이터(리스트)가 바뀌면 페이지를 1로 리셋해서 빈 화면 방지
+  // 데이터가 바뀌면 페이지 1로 리셋
   React.useEffect(() => {
     setPage(1);
   }, [total]);
@@ -34,8 +36,8 @@ export default function DuePage() {
     });
   }, [total, page, current]);
 
-  const handleCardClick = (id: string | number) => {
-    navigate(`/detail/${Number(id)}`);
+  const handleCardClick = (id: number) => {
+    navigate(`/detail/${id}`);
   };
 
   return (
@@ -56,8 +58,8 @@ export default function DuePage() {
         >
           {current.map((n) => (
             <NoticeCard
-              key={n.id}
-              {...n}
+              key={String(n.id)}          // key는 문자열 권장
+              notice={n}                  // ✅ 단일 prop으로 전달
               onClick={() => handleCardClick(n.id)}
             />
           ))}

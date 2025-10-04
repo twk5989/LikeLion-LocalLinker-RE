@@ -1,3 +1,4 @@
+// src/pages/Category/CategoryPage.tsx
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Layout from '../../layouts/layout';
@@ -100,8 +101,7 @@ export default function CategoryPage() {
     setPersonalOnly((prev) => {
       const nv = !prev;
       if (prev === true) setPending(applied); // OFF 전환 시 현재 적용값 프리필
-      if (DEBUG)
-        console.log('[CategoryPage] togglePersonal()', { from: prev, to: nv });
+      if (DEBUG) console.log('[CategoryPage] togglePersonal()', { from: prev, to: nv });
       return nv;
     });
     deferSetSp((prev) => {
@@ -134,17 +134,13 @@ export default function CategoryPage() {
     page: 0,
     size: 500,
     visa: visaParam,
-    // married는 더 이상 넘기지 않음
   } as const);
 
   // 'due' 정렬 결과가 비면 원본으로 폴백 (마감 null 대응)
   const sortedAll = useMemo(() => {
     const s = sortNotices(categoryList, sortKey);
     if (sortKey === 'due' && s.length === 0 && categoryList.length > 0) {
-      if (DEBUG)
-        console.log(
-          '[CategoryPage] due sort empty → fallback to original list',
-        );
+      if (DEBUG) console.log('[CategoryPage] due sort empty → fallback to original list');
       return categoryList;
     }
     return s;
@@ -177,9 +173,7 @@ export default function CategoryPage() {
       return next;
     });
     requestAnimationFrame(() => {
-      document
-        .getElementById('top-anchor')
-        ?.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('top-anchor')?.scrollIntoView({ behavior: 'smooth' });
     });
   };
 
@@ -198,27 +192,17 @@ export default function CategoryPage() {
   const isEmptyAll = !loading && !error && total === 0;
 
   return (
-    <Layout
-      showHeader
-      showFooter
-      headerProps={{ type: 'detail', text: CATEGORY_LABELS[cat] }}
-    >
+    <Layout showHeader showFooter headerProps={{ type: 'detail', text: CATEGORY_LABELS[cat] }}>
       <div id="top-anchor" />
       <L.Wrap>
-        <CategoryTabs
-          active={cat}
-          order={CATEGORY_ORDER}
-          onChange={goCategory}
-        />
+        <CategoryTabs active={cat} order={CATEGORY_ORDER} onChange={goCategory} />
 
         <L.CountBar>
           <b style={{ color: '#111827' }}>
             전체 <span style={{ color: '#0FB050' }}>{total}</span>건
           </b>
           {error && (
-            <span style={{ color: 'crimson', marginLeft: 8 }}>
-              에러: {error}
-            </span>
+            <span style={{ color: 'crimson', marginLeft: 8 }}>에러: {error}</span>
           )}
         </L.CountBar>
 
@@ -230,18 +214,21 @@ export default function CategoryPage() {
             padding: '6px 16px 8px',
           }}
         >
-          <PersonSwitch
-            personalOnly={personalOnly}
-            onSwitchPerson={togglePersonal}
+          <PersonSwitch personalOnly={personalOnly} onSwitchPerson={togglePersonal} />
+          <SortButtons
+            sortKey={sortKey}
+            onChangeSort={(k) => {
+              setSortKey(k);
+              setPageSafe(1);
+            }}
           />
-          <SortButtons sortKey={sortKey} onChangeSort={setSortKey} />
         </div>
 
         {!personalOnly && (
           <FilterPanel
             visa={pending.visa}
-            nation={pending.nation} // 보기용
-            married={pending.married} // 보기용 (전송 안 함)
+            nation={pending.nation}     // 보기용
+            married={pending.married}   // 보기용 (전송 안 함)
             onChange={(patch) => setPending((f) => ({ ...f, ...patch }))}
             onReset={resetFilters}
             onSubmit={applyFilters}
@@ -255,9 +242,9 @@ export default function CategoryPage() {
           <Fallback loading={loading} error={error} empty={isEmptyAll}>
             {current.map((n) => (
               <NoticeCard
-                key={n.id}
-                {...n}
-                onClick={() => navigate(`/detail/${Number(n.id)}`)}
+                key={String(n.id)}                               //key 문자열화
+                notice={n}                                       //단일 prop
+                onClick={() => navigate(`/detail/${Number(n.id)}`)}  //백틱 필수
               />
             ))}
           </Fallback>

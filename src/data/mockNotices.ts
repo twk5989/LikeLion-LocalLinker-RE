@@ -1,853 +1,113 @@
-// src/data-mockNotices.ts
-// 백엔드 스키마 그대로 + 필터 패널을 위한 visa, nationality(단일 문자열)만 추가
-// 카테고리별 10개씩 총 60개
+// src/data/mockNotices.ts
+import type { BackendNotice } from '../types/notices';
 
-export const mockNotices = [
-  {
-    "id": 1,
-    "title": "행정 서비스 안내 #01",
-    "category": "ADMINISTRATION",
-    "organization": "행정안전부",
-    "applyStartAt": "2024-07-05T10:00:00",
-    "applyEndAt": "2026-05-01T18:00:00",
-    "eligibility": "체류 외국인",
-    "tags": "SYSTEM",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "F-2",
-    "nationality": "RU"
-  },
-  {
-    "id": 2,
-    "title": "행정 서비스 안내 #02",
-    "category": "ADMINISTRATION",
-    "organization": "행정안전부",
-    "applyStartAt": "2027-11-01T10:00:00",
-    "applyEndAt": "2029-06-28T18:00:00",
-    "eligibility": "다문화가정",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "E-9",
-    "nationality": "PH"
-  },
-  {
-    "id": 3,
-    "title": "행정 서비스 프로그램 #03",
-    "category": "ADMINISTRATION",
-    "organization": "행정안전부",
-    "applyStartAt": "2027-05-01T10:00:00",
-    "applyEndAt": "2029-03-18T18:00:00",
-    "eligibility": "아동(7세~18세)",
-    "tags": "SYSTEM",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "E-9",
-    "nationality": "JP"
-  },
-  {
-    "id": 4,
-    "title": "행정 서비스 상담 #04",
-    "category": "ADMINISTRATION",
-    "organization": "행정안전부",
-    "applyStartAt": "2026-09-10T09:00:00",
-    "applyEndAt": "2028-07-29T18:00:00",
-    "eligibility": "외국인 유학생",
-    "tags": "BENEFIT",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "F-2",
-    "nationality": "JP"
-  },
-  {
-    "id": 5,
-    "title": "행정 서비스 바우처 #05",
-    "category": "ADMINISTRATION",
-    "organization": "행정안전부",
-    "applyStartAt": "2026-02-10T09:00:00",
-    "applyEndAt": "2028-11-27T18:00:00",
-    "eligibility": "외국인 근로자",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "E-7",
-    "nationality": "TH"
-  },
-  {
-    "id": 6,
-    "title": "행정 서비스 프로그램 #06",
-    "category": "ADMINISTRATION",
-    "organization": "행정안전부",
-    "applyStartAt": "2027-12-01T10:00:00",
-    "applyEndAt": "2029-07-07T23:00:00",
-    "eligibility": "구직자(외국인 포함)",
-    "tags": "SYSTEM",
-    "isPeriodLimited": true,
-    "language": "KO",
-    "visa": "D-10",
-    "nationality": "MM"
-  },
-  {
-    "id": 7,
-    "title": "행정 서비스 시범사업 #07",
-    "category": "ADMINISTRATION",
-    "organization": "행정안전부",
-    "applyStartAt": "2025-03-01T09:00:00",
-    "applyEndAt": "2027-06-24T23:00:00",
-    "eligibility": "장기체류자",
-    "tags": "PROGRAM",
-    "isPeriodLimited": true,
-    "language": "KO",
-    "visa": "F-2",
-    "nationality": "JP"
-  },
-  {
-    "id": 8,
-    "title": "행정 서비스 확대 #08",
-    "category": "ADMINISTRATION",
-    "organization": "행정안전부",
-    "applyStartAt": "2025-01-10T09:00:00",
-    "applyEndAt": "2026-06-14T18:00:00",
-    "eligibility": "저소득 가구",
-    "tags": "PROGRAM",
-    "isPeriodLimited": true,
-    "language": "KO",
-    "visa": "D-10",
-    "nationality": "JP"
-  },
-  {
-    "id": 9,
-    "title": "행정 서비스 지원 #09",
-    "category": "ADMINISTRATION",
-    "organization": "행정안전부",
-    "applyStartAt": "2025-06-01T09:00:00",
-    "applyEndAt": "2027-03-20T18:00:00",
-    "eligibility": "신규 체류자",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "E-9",
-    "nationality": "JP"
-  },
-  {
-    "id": 10,
-    "title": "행정 서비스 혜택 #10",
-    "category": "ADMINISTRATION",
-    "organization": "행정안전부",
-    "applyStartAt": "2026-04-01T10:00:00",
-    "applyEndAt": "2028-04-06T23:00:00",
-    "eligibility": "지역 거주자",
-    "tags": "PROGRAM",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "E-7",
-    "nationality": "JP"
-  },
+/**
+ * 카테고리 × 비자별로 3~4개씩 생성
+ * - 카테고리: 6종 (백엔드 타입과 동일)
+ * - 비자: 14종 (하이픈 형식: 'D-2', 'E-7' 등)  ← 필터는 mockOrApi에서 D_2로 입력해도 매칭됨
+ * - 일부는 마감일/시작일 null로 섞어서 정렬/폴백 동작 확인 가능
+ */
 
-  {
-    "id": 11,
-    "title": "의료 지원 프로그램 #01",
-    "category": "MEDICAL",
-    "organization": "보건복지부",
-    "applyStartAt": "2024-03-10T10:00:00",
-    "applyEndAt": "2027-08-10T18:00:00",
-    "eligibility": "체류 외국인",
-    "tags": "PROGRAM",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "E-9",
-    "nationality": "JP"
-  },
-  {
-    "id": 12,
-    "title": "의료 지원 시범사업 #02",
-    "category": "MEDICAL",
-    "organization": "보건복지부",
-    "applyStartAt": "2026-05-10T10:00:00",
-    "applyEndAt": "2028-03-17T18:00:00",
-    "eligibility": "외국인 근로자",
-    "tags": "PROGRAM",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "E-7",
-    "nationality": "ID"
-  },
-  {
-    "id": 13,
-    "title": "의료 지원 바우처 #03",
-    "category": "MEDICAL",
-    "organization": "보건복지부",
-    "applyStartAt": "2027-06-10T10:00:00",
-    "applyEndAt": "2029-03-21T23:00:00",
-    "eligibility": "구직자(외국인 포함)",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "F-2",
-    "nationality": "JP"
-  },
-  {
-    "id": 14,
-    "title": "의료 지원 안내 #04",
-    "category": "MEDICAL",
-    "organization": "보건복지부",
-    "applyStartAt": "2027-01-10T10:00:00",
-    "applyEndAt": "2029-08-19T18:00:00",
-    "eligibility": "아동(7세~18세)",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "E-7",
-    "nationality": "TH"
-  },
-  {
-    "id": 15,
-    "title": "의료 지원 신청 #05",
-    "category": "MEDICAL",
-    "organization": "보건복지부",
-    "applyStartAt": "2027-01-01T10:00:00",
-    "applyEndAt": "2029-04-30T18:00:00",
-    "eligibility": "저소득 가구",
-    "tags": "PROGRAM",
-    "isPeriodLimited": true,
-    "language": "KO",
-    "visa": "E-7",
-    "nationality": "UZ"
-  },
-  {
-    "id": 16,
-    "title": "의료 지원 강화 #06",
-    "category": "MEDICAL",
-    "organization": "보건복지부",
-    "applyStartAt": "2026-04-10T09:00:00",
-    "applyEndAt": "2028-09-20T18:00:00",
-    "eligibility": "외국인 유학생",
-    "tags": "BENEFIT",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "D-2",
-    "nationality": "RU"
-  },
-  {
-    "id": 17,
-    "title": "의료 지원 확대 #07",
-    "category": "MEDICAL",
-    "organization": "보건복지부",
-    "applyStartAt": "2026-09-10T10:00:00",
-    "applyEndAt": "2029-02-12T23:00:00",
-    "eligibility": "지역 거주자",
-    "tags": "SYSTEM",
-    "isPeriodLimited": true,
-    "language": "KO",
-    "visa": "F-2",
-    "nationality": "JP"
-  },
-  {
-    "id": 18,
-    "title": "의료 지원 안내 #08",
-    "category": "MEDICAL",
-    "organization": "보건복지부",
-    "applyStartAt": "2026-06-10T09:00:00",
-    "applyEndAt": "2029-01-10T18:00:00",
-    "eligibility": "장기체류자",
-    "tags": "PROGRAM",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "E-7",
-    "nationality": "PH"
-  },
-  {
-    "id": 19,
-    "title": "의료 지원 혜택 #09",
-    "category": "MEDICAL",
-    "organization": "보건복지부",
-    "applyStartAt": "2026-09-10T10:00:00",
-    "applyEndAt": "2028-06-01T23:00:00",
-    "eligibility": "신규 체류자",
-    "tags": "SYSTEM",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "F-5",
-    "nationality": "ID"
-  },
-  {
-    "id": 20,
-    "title": "의료 지원 지원 #10",
-    "category": "MEDICAL",
-    "organization": "보건복지부",
-    "applyStartAt": "2024-02-10T10:00:00",
-    "applyEndAt": "2026-10-04T18:00:00",
-    "eligibility": "다문화가정",
-    "tags": "BENEFIT",
-    "isPeriodLimited": true,
-    "language": "KO",
-    "visa": "F-2",
-    "nationality": "MM"
-  },
-
-  {
-    "id": 21,
-    "title": "주거 지원 프로그램 #01",
-    "category": "HOUSING",
-    "organization": "국토교통부",
-    "applyStartAt": "2025-04-10T10:00:00",
-    "applyEndAt": "2027-05-07T18:00:00",
-    "eligibility": "외국인 유학생",
-    "tags": "BENEFIT",
-    "isPeriodLimited": true,
-    "language": "KO",
-    "visa": "D-2",
-    "nationality": "JP"
-  },
-  {
-    "id": 22,
-    "title": "주거 지원 확대 #02",
-    "category": "HOUSING",
-    "organization": "국토교통부",
-    "applyStartAt": "2027-04-10T09:00:00",
-    "applyEndAt": "2029-03-02T23:00:00",
-    "eligibility": "신규 체류자",
-    "tags": "PROGRAM",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "E-9",
-    "nationality": "JP"
-  },
-  {
-    "id": 23,
-    "title": "주거 지원 시범사업 #03",
-    "category": "HOUSING",
-    "organization": "국토교통부",
-    "applyStartAt": "2025-01-10T10:00:00",
-    "applyEndAt": "2027-09-17T18:00:00",
-    "eligibility": "구직자(외국인 포함)",
-    "tags": "PROGRAM",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "F-5",
-    "nationality": "RU"
-  },
-  {
-    "id": 24,
-    "title": "주거 지원 확장 #04",
-    "category": "HOUSING",
-    "organization": "국토교통부",
-    "applyStartAt": "2026-04-10T10:00:00",
-    "applyEndAt": "2028-10-25T23:00:00",
-    "eligibility": "장기체류자",
-    "tags": "BENEFIT",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "F-6",
-    "nationality": "RU"
-  },
-  {
-    "id": 25,
-    "title": "주거 지원 신청 #05",
-    "category": "HOUSING",
-    "organization": "국토교통부",
-    "applyStartAt": "2025-07-10T10:00:00",
-    "applyEndAt": "2027-04-12T18:00:00",
-    "eligibility": "저소득 가구",
-    "tags": "SYSTEM",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "E-9",
-    "nationality": "RU"
-  },
-  {
-    "id": 26,
-    "title": "주거 지원 안내 #06",
-    "category": "HOUSING",
-    "organization": "국토교통부",
-    "applyStartAt": "2025-10-10T09:00:00",
-    "applyEndAt": "2028-06-05T18:00:00",
-    "eligibility": "지역 거주자",
-    "tags": "PROGRAM",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "E-9",
-    "nationality": "RU"
-  },
-  {
-    "id": 27,
-    "title": "주거 지원 혜택 #07",
-    "category": "HOUSING",
-    "organization": "국토교통부",
-    "applyStartAt": "2027-02-10T09:00:00",
-    "applyEndAt": "2029-01-06T18:00:00",
-    "eligibility": "아동(7세~18세)",
-    "tags": "SYSTEM",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "F-5",
-    "nationality": "ID"
-  },
-  {
-    "id": 28,
-    "title": "주거 지원 프로그램 #08",
-    "category": "HOUSING",
-    "organization": "국토교통부",
-    "applyStartAt": "2027-01-10T09:00:00",
-    "applyEndAt": "2029-07-08T23:00:00",
-    "eligibility": "체류 외국인",
-    "tags": "PROGRAM",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "E-9",
-    "nationality": "PH"
-  },
-  {
-    "id": 29,
-    "title": "주거 지원 안내 #09",
-    "category": "HOUSING",
-    "organization": "국토교통부",
-    "applyStartAt": "2026-07-10T09:00:00",
-    "applyEndAt": "2028-04-22T18:00:00",
-    "eligibility": "다문화가정",
-    "tags": "SYSTEM",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "E-9",
-    "nationality": "JP"
-  },
-  {
-    "id": 30,
-    "title": "주거 지원 상담 #10",
-    "category": "HOUSING",
-    "organization": "국토교통부",
-    "applyStartAt": "2027-09-10T10:00:00",
-    "applyEndAt": "2029-02-22T18:00:00",
-    "eligibility": "신규 체류자",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "D-2",
-    "nationality": "VN"
-  },
-
-  {
-    "id": 31,
-    "title": "취업·근로 지원 안내 #01",
-    "category": "EMPLOYMENT",
-    "organization": "고용노동부",
-    "applyStartAt": "2026-10-10T10:00:00",
-    "applyEndAt": "2029-01-26T23:00:00",
-    "eligibility": "장기체류자",
-    "tags": "SYSTEM",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "E-7",
-    "nationality": "MM"
-  },
-  {
-    "id": 32,
-    "title": "취업·근로 지원 프로그램 #02",
-    "category": "EMPLOYMENT",
-    "organization": "고용노동부",
-    "applyStartAt": "2026-10-10T10:00:00",
-    "applyEndAt": "2028-05-27T18:00:00",
-    "eligibility": "외국인 근로자",
-    "tags": "SYSTEM",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "E-7",
-    "nationality": "JP"
-  },
-  {
-    "id": 33,
-    "title": "취업·근로 지원 안내 #03",
-    "category": "EMPLOYMENT",
-    "organization": "고용노동부",
-    "applyStartAt": "2024-05-10T10:00:00",
-    "applyEndAt": "2026-10-15T18:00:00",
-    "eligibility": "외국인 유학생",
-    "tags": "PROGRAM",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "E-7",
-    "nationality": "JP"
-  },
-  {
-    "id": 34,
-    "title": "취업·근로 지원 상담 #04",
-    "category": "EMPLOYMENT",
-    "organization": "고용노동부",
-    "applyStartAt": "2026-01-10T09:00:00",
-    "applyEndAt": "2028-06-29T23:00:00",
-    "eligibility": "신규 체류자",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "D-2",
-    "nationality": "KH"
-  },
-  {
-    "id": 35,
-    "title": "취업·근로 지원 바우처 #05",
-    "category": "EMPLOYMENT",
-    "organization": "고용노동부",
-    "applyStartAt": "2027-01-10T10:00:00",
-    "applyEndAt": "2029-05-12T18:00:00",
-    "eligibility": "지역 거주자",
-    "tags": "SYSTEM",
-    "isPeriodLimited": true,
-    "language": "KO",
-    "visa": "E-7",
-    "nationality": "JP"
-  },
-  {
-    "id": 36,
-    "title": "취업·근로 지원 안내 #06",
-    "category": "EMPLOYMENT",
-    "organization": "고용노동부",
-    "applyStartAt": "2024-01-10T09:00:00",
-    "applyEndAt": "2026-06-10T18:00:00",
-    "eligibility": "다문화가정",
-    "tags": "PROGRAM",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "E-9",
-    "nationality": "ID"
-  },
-  {
-    "id": 37,
-    "title": "취업·근로 지원 신청 #07",
-    "category": "EMPLOYMENT",
-    "organization": "고용노동부",
-    "applyStartAt": "2026-09-10T09:00:00",
-    "applyEndAt": "2028-05-28T18:00:00",
-    "eligibility": "저소득 가구",
-    "tags": "PROGRAM",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "E-7",
-    "nationality": "RU"
-  },
-  {
-    "id": 38,
-    "title": "취업·근로 지원 강화 #08",
-    "category": "EMPLOYMENT",
-    "organization": "고용노동부",
-    "applyStartAt": "2026-01-10T10:00:00",
-    "applyEndAt": "2029-03-25T23:00:00",
-    "eligibility": "체류 외국인",
-    "tags": "PROGRAM",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "F-6",
-    "nationality": "VN"
-  },
-  {
-    "id": 39,
-    "title": "취업·근로 지원 확대 #09",
-    "category": "EMPLOYMENT",
-    "organization": "고용노동부",
-    "applyStartAt": "2025-04-10T10:00:00",
-    "applyEndAt": "2027-12-27T18:00:00",
-    "eligibility": "구직자(외국인 포함)",
-    "tags": "BENEFIT",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "E-7",
-    "nationality": "RU"
-  },
-  {
-    "id": 40,
-    "title": "취업·근로 지원 혜택 #10",
-    "category": "EMPLOYMENT",
-    "organization": "고용노동부",
-    "applyStartAt": "2027-11-10T10:00:00",
-    "applyEndAt": "2029-06-04T23:00:00",
-    "eligibility": "지역 거주자",
-    "tags": "PROGRAM",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "E-7",
-    "nationality": "VN"
-  },
-
-  {
-    "id": 41,
-    "title": "교육 지원 안내 #01",
-    "category": "EDUCATION",
-    "organization": "교육부",
-    "applyStartAt": "2026-08-10T10:00:00",
-    "applyEndAt": "2029-02-06T18:00:00",
-    "eligibility": "다문화가정",
-    "tags": "PROGRAM",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "D-2",
-    "nationality": "RU"
-  },
-  {
-    "id": 42,
-    "title": "교육 지원 프로그램 #02",
-    "category": "EDUCATION",
-    "organization": "교육부",
-    "applyStartAt": "2026-08-10T09:00:00",
-    "applyEndAt": "2028-12-31T18:00:00",
-    "eligibility": "외국인 유학생",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "D-2",
-    "nationality": "PH"
-  },
-  {
-    "id": 43,
-    "title": "교육 지원 확대 #03",
-    "category": "EDUCATION",
-    "organization": "교육부",
-    "applyStartAt": "2026-12-10T10:00:00",
-    "applyEndAt": "2028-09-28T23:00:00",
-    "eligibility": "아동(7세~18세)",
-    "tags": "BENEFIT",
-    "isPeriodLimited": true,
-    "language": "KO",
-    "visa": "D-2",
-    "nationality": "RU"
-  },
-  {
-    "id": 44,
-    "title": "교육 지원 신청 #04",
-    "category": "EDUCATION",
-    "organization": "교육부",
-    "applyStartAt": "2027-09-10T10:00:00",
-    "applyEndAt": "2029-05-19T18:00:00",
-    "eligibility": "저소득 가구",
-    "tags": "PROGRAM",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "D-2",
-    "nationality": "RU"
-  },
-  {
-    "id": 45,
-    "title": "교육 지원 안내 #05",
-    "category": "EDUCATION",
-    "organization": "교육부",
-    "applyStartAt": "2025-05-10T10:00:00",
-    "applyEndAt": "2027-09-04T18:00:00",
-    "eligibility": "구직자(외국인 포함)",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "D-2",
-    "nationality": "VN"
-  },
-  {
-    "id": 46,
-    "title": "교육 지원 상담 #06",
-    "category": "EDUCATION",
-    "organization": "교육부",
-    "applyStartAt": "2026-05-10T09:00:00",
-    "applyEndAt": "2028-10-26T18:00:00",
-    "eligibility": "장기체류자",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "D-10",
-    "nationality": "VN"
-  },
-  {
-    "id": 47,
-    "title": "교육 지원 혜택 #07",
-    "category": "EDUCATION",
-    "organization": "교육부",
-    "applyStartAt": "2024-11-10T10:00:00",
-    "applyEndAt": "2026-04-14T18:00:00",
-    "eligibility": "체류 외국인",
-    "tags": "PROGRAM",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "D-10",
-    "nationality": "JP"
-  },
-  {
-    "id": 48,
-    "title": "교육 지원 안내 #08",
-    "category": "EDUCATION",
-    "organization": "교육부",
-    "applyStartAt": "2025-06-10T10:00:00",
-    "applyEndAt": "2027-07-11T18:00:00",
-    "eligibility": "지역 거주자",
-    "tags": "PROGRAM",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "D-2",
-    "nationality": "VN"
-  },
-  {
-    "id": 49,
-    "title": "교육 지원 시범사업 #09",
-    "category": "EDUCATION",
-    "organization": "교육부",
-    "applyStartAt": "2027-08-10T09:00:00",
-    "applyEndAt": "2029-03-26T23:00:00",
-    "eligibility": "신규 체류자",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "D-10",
-    "nationality": "JP"
-  },
-  {
-    "id": 50,
-    "title": "교육 지원 확대 #10",
-    "category": "EDUCATION",
-    "organization": "교육부",
-    "applyStartAt": "2026-11-10T10:00:00",
-    "applyEndAt": "2029-05-28T23:00:00",
-    "eligibility": "외국인 근로자",
-    "tags": "SYSTEM",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "D-2",
-    "nationality": "JP"
-  },
-
-  {
-    "id": 51,
-    "title": "생활지원 서비스 안내 #01",
-    "category": "LIFE_SUPPORT",
-    "organization": "여성가족부",
-    "applyStartAt": "2026-06-10T10:00:00",
-    "applyEndAt": "2029-03-30T23:00:00",
-    "eligibility": "지역 거주자",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "F-5",
-    "nationality": "VN"
-  },
-  {
-    "id": 52,
-    "title": "생활지원 서비스 바우처 #02",
-    "category": "LIFE_SUPPORT",
-    "organization": "여성가족부",
-    "applyStartAt": "2025-02-10T09:00:00",
-    "applyEndAt": "2027-12-18T18:00:00",
-    "eligibility": "체류 외국인",
-    "tags": "PROGRAM",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "E-9",
-    "nationality": "JP"
-  },
-  {
-    "id": 53,
-    "title": "생활지원 서비스 혜택 #03",
-    "category": "LIFE_SUPPORT",
-    "organization": "여성가족부",
-    "applyStartAt": "2026-09-10T10:00:00",
-    "applyEndAt": "2028-03-16T18:00:00",
-    "eligibility": "장기체류자",
-    "tags": "SYSTEM",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "E-7",
-    "nationality": "JP"
-  },
-  {
-    "id": 54,
-    "title": "생활지원 서비스 확대 #04",
-    "category": "LIFE_SUPPORT",
-    "organization": "여성가족부",
-    "applyStartAt": "2025-08-10T09:00:00",
-    "applyEndAt": "2027-01-30T18:00:00",
-    "eligibility": "구직자(외국인 포함)",
-    "tags": "PROGRAM",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "D-10",
-    "nationality": "JP"
-  },
-  {
-    "id": 55,
-    "title": "생활지원 서비스 안내 #05",
-    "category": "LIFE_SUPPORT",
-    "organization": "여성가족부",
-    "applyStartAt": "2025-07-10T10:00:00",
-    "applyEndAt": "2028-12-23T23:00:00",
-    "eligibility": "저소득 가구",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "E-9",
-    "nationality": "JP"
-  },
-  {
-    "id": 56,
-    "title": "생활지원 서비스 프로그램 #06",
-    "category": "LIFE_SUPPORT",
-    "organization": "여성가족부",
-    "applyStartAt": "2024-01-10T10:00:00",
-    "applyEndAt": "2026-10-06T23:00:00",
-    "eligibility": "다문화가정",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "KO",
-    "visa": "F-2",
-    "nationality": "RU"
-  },
-  {
-    "id": 57,
-    "title": "생활지원 서비스 상담 #07",
-    "category": "LIFE_SUPPORT",
-    "organization": "여성가족부",
-    "applyStartAt": "2027-01-10T09:00:00",
-    "applyEndAt": "2029-06-03T18:00:00",
-    "eligibility": "아동(7세~18세)",
-    "tags": "BENEFIT",
-    "isPeriodLimited": true,
-    "language": "EN",
-    "visa": "D-10",
-    "nationality": "RU"
-  },
-  {
-    "id": 58,
-    "title": "생활지원 서비스 안내 #08",
-    "category": "LIFE_SUPPORT",
-    "organization": "여성가족부",
-    "applyStartAt": "2025-01-10T09:00:00",
-    "applyEndAt": "2027-10-10T18:00:00",
-    "eligibility": "외국인 유학생",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "D-2",
-    "nationality": "JP"
-  },
-  {
-    "id": 59,
-    "title": "생활지원 서비스 신청 #09",
-    "category": "LIFE_SUPPORT",
-    "organization": "여성가족부",
-    "applyStartAt": "2025-05-10T10:00:00",
-    "applyEndAt": "2028-12-17T18:00:00",
-    "eligibility": "신규 체류자",
-    "tags": "BENEFIT",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "F-2",
-    "nationality": "JP"
-  },
-  {
-    "id": 60,
-    "title": "생활지원 서비스 안내 #10",
-    "category": "LIFE_SUPPORT",
-    "organization": "여성가족부",
-    "applyStartAt": "2027-08-10T09:00:00",
-    "applyEndAt": "2029-01-22T18:00:00",
-    "eligibility": "체류 외국인",
-    "tags": "SYSTEM",
-    "isPeriodLimited": false,
-    "language": "EN",
-    "visa": "E-7",
-    "nationality": "JP"
-  }
+const CATEGORIES = [
+  'ADMINISTRATION',
+  'MEDICAL',
+  'HOUSING',
+  'EMPLOYMENT',
+  'EDUCATION',
+  'LIFE_SUPPORT',
 ] as const;
 
+const VISAS = [
+  'D-2', 'D-4', 'D-10',
+  'E-1', 'E-2', 'E-7', 'E-9',
+  'F-2', 'F-4', 'F-5', 'F-6',
+  'H-2',
+  'C-3', 'G-1',
+] as const;
+
+const NATIONALITIES = [
+  'CN','JP','US','VN','TH','PH','ID','NP','UZ','RU','SG','IN','PK','BD','KH','MM','LA','MN',
+] as const;
+
+const ORGS = [
+  '여성가족부','법무부','보건복지부','고용노동부','교육부','행정안전부',
+  '서울특별시','경기도','부산광역시','인천광역시','대구광역시','대전광역시',
+];
+
+const TAGS: Array<BackendNotice['tags']> = ['BENEFIT', 'SYSTEM', 'PROGRAM', null];
+
+/** YYYY-MM-DDTHH:mm:ss 형식 간단 생성 */
+const iso = (y: number, m: number, d: number, h = 9) =>
+  `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}T${String(h).padStart(2, '0')}:00:00`;
+
+/** 의사 랜덤(안정적 재현을 위해 시드 없이 인덱스 기반 결정) */
+const pick = <T,>(arr: readonly T[], seed: number) => arr[seed % arr.length];
+
+const makeTitle = (cat: string, visa: string, idx: number) =>
+  `${cat} | ${visa} 대상 지원/제도 #${idx}`;
+
+let idSeq = 1;
+
+// 비자별 개수: 3 또는 4(번갈아가며)
+const perVisaCount = (vIdx: number) => (vIdx % 2 === 0 ? 3 : 4);
+
+function buildOne(
+  cat: typeof CATEGORIES[number],
+  visa: typeof VISAS[number],
+  vIdx: number,
+  k: number,                // 0..N-1
+): BackendNotice {
+  const i = idSeq++;
+  const year = 2025 + ((vIdx + k) % 3); // 2025~2027
+  const startMonth = ((vIdx + k) % 12) + 1; // 1~12
+  const startDay = ((vIdx * 7 + k * 3) % 27) + 1; // 1~28
+  const hasStart = (vIdx + k) % 6 !== 0; // 일부는 시작일 없음
+  const hasEnd = (vIdx + k) % 4 !== 0;   // 일부는 마감일 없음
+
+  const applyStartAt = hasStart ? iso(year, startMonth, startDay, 9) : null;
+
+  // 마감은 시작 이후 30~180일 범위
+  const spanDays = 30 + ((vIdx * 13 + k * 17) % 151); // 30~180
+  const endDate = new Date(`${applyStartAt ?? iso(year, startMonth, startDay, 9)}`);
+  endDate.setDate(endDate.getDate() + spanDays);
+  const applyEndAt = hasEnd ? iso(
+    endDate.getFullYear(),
+    endDate.getMonth() + 1,
+    endDate.getDate(),
+    18,
+  ) : null;
+
+  const organization = pick(ORGS, vIdx + k);
+  const nationality = pick(NATIONALITIES, vIdx + k * 5);
+  const tag = pick(TAGS, vIdx + k * 11);
+  const isPeriodLimited = Boolean((vIdx + k) % 3 === 0);
+
+  return {
+    id: i,
+    title: makeTitle(cat, visa, k + 1),
+    category: cat,
+    organization,
+    sourceUrl: `https://example.com/post/${i}`,
+    applyStartAt,
+    applyEndAt,
+    eligibility: (k + vIdx) % 2 === 0 ? '체류 외국인' : '결혼이민자 및 가족',
+    tags: tag,
+    isPeriodLimited,
+    visa,                // 하이픈 형식 저장 (필터는 D_2도 매칭됨)
+    nationality,         // 샘플 국적
+  };
+}
+
+const mockNotices: BackendNotice[] = [];
+
+CATEGORIES.forEach((cat, cIdx) => {
+  VISAS.forEach((visa, vIdx) => {
+    const n = perVisaCount(vIdx);
+    for (let k = 0; k < n; k += 1) {
+      mockNotices.push(buildOne(cat, visa, vIdx + cIdx, k));
+    }
+  });
+});
+
+export { mockNotices };
 export default mockNotices;

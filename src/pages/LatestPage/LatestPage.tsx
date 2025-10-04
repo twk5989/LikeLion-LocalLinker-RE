@@ -8,7 +8,7 @@ import Fallback from '../../components/Common/Fallback';
 import FilterPanel from '../../components/FilterPanel/FilterPanel';
 import PersonSwitch from '../../components/PersonSwitch/PersonSwitch';
 import SortButtons from '../../components/SortButtons/SortButtons';
-import { sortNotices } from '../../components/SortButtons/sort';
+import { sortNotices } from '../../components/SortButtons/sort'; // ← BackendNotice 기준 정렬 함수
 import type { SortKey } from '../../components/SortButtons/SortButtons.types';
 import { VISA_OPTIONS, NATIONALITIES } from '../../constants/onboardingOptions';
 import { loadOnboardingFilters } from '../../utils/onboarding';
@@ -16,6 +16,7 @@ import { normalizeVisa } from '../../utils/visa';
 import type { FilterFormState, LatestPageProps } from './LatestPage.types';
 import * as L from './LatestPage.styles';
 import { useNavigate } from 'react-router-dom';
+import type { BackendNotice } from '../../types/notices';
 
 const PAGE_SIZE = 6;
 
@@ -25,9 +26,7 @@ const toVisaParam = (visaValue?: string): string | undefined => {
   return n.trim().toUpperCase().replace(/-/g, '_').replace(/\s+/g, '');
 };
 
-export default function LatestPage({
-  pageSize = 200,
-}: LatestPageProps) {
+export default function LatestPage({ pageSize = 200 }: LatestPageProps) {
   const navigate = useNavigate();
   const [sortKey, setSortKey] = React.useState<SortKey>('due');
   const [personalOnly, setPersonalOnly] = React.useState(true);
@@ -45,11 +44,14 @@ export default function LatestPage({
   const onboarding = loadOnboardingFilters(); // { visa, nation, married }
   const active = personalOnly ? onboarding : applied;
 
-  const visaParam = toVisaParam(active.visa); // 서버엔 비자만 전달
+  // 서버 요청 파라미터(비자만 전달)
+  const visaParam = toVisaParam(active.visa);
 
+  // ✅ useLatest가 BackendNotice[]를 반환한다고 가정
   const { list, loading, error } = useLatest(pageSize, { visa: visaParam });
 
-  const sorted = React.useMemo(
+  // ✅ BackendNotice 기준 정렬
+  const sorted: BackendNotice[] = React.useMemo(
     () => sortNotices(list, sortKey),
     [list, sortKey],
   );
@@ -82,8 +84,8 @@ export default function LatestPage({
     setPage(1);
   }, [applied]);
 
-  const handleCardClick = (id: string | number) => {
-    navigate(`/detail/${Number(id)}`);
+  const handleCardClick = (id: number) => {
+    navigate(`/detail/${id}`);
   };
 
   const isEmptyAll = !loading && !error && total === 0;
@@ -100,10 +102,7 @@ export default function LatestPage({
 
         {/* 컨트롤 바 */}
         <L.Controls>
-          <PersonSwitch
-            personalOnly={personalOnly}
-            onSwitchPerson={togglePersonal}
-          />
+          <PersonSwitch personalOnly={personalOnly} onSwitchPerson={togglePersonal} />
           <SortButtons
             sortKey={sortKey}
             onChangeSort={(k) => {
@@ -139,8 +138,8 @@ export default function LatestPage({
           >
             {current.map((n) => (
               <NoticeCard
-                key={n.id}
-                {...n}
+                key={String(n.id)}   
+                notice={n}             
                 onClick={() => handleCardClick(n.id)}
               />
             ))}

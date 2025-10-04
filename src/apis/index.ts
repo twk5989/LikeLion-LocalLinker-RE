@@ -1,56 +1,114 @@
 // src/apis/index.ts
 import axios from 'axios';
+import type { AxiosRequestConfig } from 'axios';
 import { BASE_URL } from './config';
 import mockNoticesDefault, { mockNotices as mockNoticesNamed } from '../data/mockNotices';
 
-// CRA/webpack, Vite 둘 다 대응 (하나만 쓰면 그 한 줄만 남겨도 됨)
-const USE_MOCK =
-  (typeof process !== 'undefined' && process.env?.REACT_APP_USE_MOCK === 'true') ||
-  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_USE_MOCK === 'true');
+/* ------------------------------------------------------------------ */
+/* ENV 읽기 (CRA + Vite, 대/소문자/1/yes 허용)                         */
+/* ------------------------------------------------------------------ */
+const getEnv = (k: string): string | undefined => {
+  // Vite 환경 변수
+  const viteEnv: Record<string, any> | undefined =
+    typeof import.meta !== 'undefined'
+      ? (import.meta as unknown as { env?: Record<string, any> }).env
+      : undefined;
 
-// 공용 axios 인스턴스 생성
+  // CRA 환경 변수
+  const craEnv: Record<string, string> | undefined =
+    typeof process !== 'undefined'
+      ? ((process.env as unknown) as Record<string, string>)
+      : undefined;
+
+  return (viteEnv && viteEnv[k]) || (craEnv && craEnv[k]) || undefined;
+};
+
+const parseBool = (v: unknown): boolean => {
+  const s = String(v ?? '').trim().toLowerCase();
+  return s === 'true' || s === '1' || s === 'yes';
+};
+
+// 환경 판별
+const viteIsProd =
+  typeof import.meta !== 'undefined' &&
+  Boolean((import.meta as unknown as { env?: Record<string, any> }).env?.PROD);
+const craIsProd =
+  typeof process !== 'undefined' && process.env?.NODE_ENV === 'production';
+const IS_PROD = Boolean(viteIsProd ?? craIsProd);
+
+// env 플래그 읽기
+const rawMock = getEnv('VITE_USE_MOCK') ?? getEnv('REACT_APP_USE_MOCK');
+
+// ✅ 개발 환경에서는 무조건 목업 ON (캐시/미적용 이슈 방지)
+const USE_MOCK = IS_PROD ? parseBool(rawMock) : true;
+
+// 디버깅에 도움 되도록 원시값도 함께 출력
+console.info(
+  '[apis] ENV raw VITE_USE_MOCK=',
+  getEnv('VITE_USE_MOCK'),
+  'REACT_APP_USE_MOCK=',
+  getEnv('REACT_APP_USE_MOCK'),
+);
+
+/* ------------------------------------------------------------------ */
+/* axios 인스턴스 (MOCK=false일 때만 사용)                              */
+/* ------------------------------------------------------------------ */
 export const api = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 
-// ---------- 내부 유틸 ----------
+// 확인용 로그
+console.info('[apis] USE_MOCK =', USE_MOCK, 'BASE_URL =', BASE_URL);
+
+/* ------------------------------------------------------------------ */
+/* 목업 데이터                                                          */
+/* ------------------------------------------------------------------ */
 type NoticeLike = {
-  id: number;
+  id: number | string;
+  title?: string | null;
+  category?: string | null;
+  organization?: string | null;
+  applyStartAt?: string | null;
+  applyEndAt?: string | null;
   visa?: string | null;
   nationality?: string | null;
-  applyEndAt?: string | null;
   [k: string]: any;
 };
 
-// data-mockNotices.ts 가 default 또는 named export 둘 중 하나일 수 있어 안전하게 합치기
+// default 또는 named export 모두 대응
 const ALL_MOCK: NoticeLike[] = Array.isArray(mockNoticesDefault)
   ? mockNoticesDefault
   : Array.isArray(mockNoticesNamed)
   ? mockNoticesNamed
   : [];
 
-// 필터 적용 (visa, nationality, keyword(optional))
+/* ------------------------------------------------------------------ */
+/* 목업 유틸(필터/정렬)                                                 */
+/* ------------------------------------------------------------------ */
+const normVisa = (v: any) =>
+  String(v ?? '').trim().toUpperCase().replace(/\s+/g, '').replace(/-/g, '_');
+
 function applyFilters<T extends NoticeLike>(
   list: T[],
-  params: Record<string, any> = {}
+  params: Record<string, any> = {},
 ): T[] {
-  const visa = params.visa ?? null;
-  // nation / nationality 어느 키로 들어와도 지원 (과거 호환)
-  const nationality = params.nationality ?? params.nation ?? null;
+  const visaParam = params.visa ? normVisa(params.visa) : null;
+  const nationality = (params.nationality ?? params.nation) || null;
   const keyword = (params.keyword ?? '').toString().trim().toLowerCase();
 
   return list.filter((n) => {
-    // keyword: title + organization에 포함되면 통과 (옵션)
+    // 키워드: title + organization
     if (keyword) {
       const hay = `${n.title ?? ''} ${n.organization ?? ''}`.toLowerCase();
       if (!hay.includes(keyword)) return false;
     }
-    // visa: 목업에 visa가 없거나 null이면 전체 허용, 값이 있으면 정확히 일치해야
-    if (visa) {
-      if (n.visa && n.visa !== visa) return false;
+    // 비자: 데이터는 'D-2'일 수 있으므로 정규화 비교
+    if (visaParam) {
+      const nv = n.visa ? normVisa(n.visa) : null;
+      if (nv && nv !== visaParam) return false;
     }
-    // nationality: 동일 규칙
+    // 국적: 값이 있으면 정확 일치
     if (nationality) {
       if (n.nationality && n.nationality !== nationality) return false;
     }
@@ -59,7 +117,6 @@ function applyFilters<T extends NoticeLike>(
 }
 
 function sortByClosingSoon<T extends NoticeLike>(list: T[]): T[] {
-  // applyEndAt 오름차순 (가까운 마감일 먼저)
   return [...list].sort((a, b) => {
     const ta = a.applyEndAt ? Date.parse(a.applyEndAt) : Number.POSITIVE_INFINITY;
     const tb = b.applyEndAt ? Date.parse(b.applyEndAt) : Number.POSITIVE_INFINITY;
@@ -67,58 +124,90 @@ function sortByClosingSoon<T extends NoticeLike>(list: T[]): T[] {
   });
 }
 
-// ---------- 공개 API(모의 또는 실제) ----------
-export type GetOptions = {
-  params?: Record<string, any>;
-  signal?: AbortSignal;
-};
-
-export async function mockOrApiGet<T>(url: string, options?: GetOptions): Promise<T> {
+/* ------------------------------------------------------------------ */
+/* 공개 API: mockOrApi*                                                */
+/*  - MOCK=true  → 네트워크 미사용, 내부 목업에서 즉시 응답             */
+/*  - MOCK=false → axios로 요청 후 res.data 반환                        */
+/* ------------------------------------------------------------------ */
+export async function mockOrApiGet<T>(
+  url: string,
+  options?: AxiosRequestConfig,
+): Promise<T> {
   if (!USE_MOCK) {
-    const res = await api.get<T>(url, options as any);
-    return res.data;
+    const res = await api.get<T>(url, options);
+    return res.data as T;
   }
 
-  // ✅ MOCK 경로
+  // ✅ MOCK 경로 (네트워크 미탐)
   const params = options?.params ?? {};
   const filtered = applyFilters(ALL_MOCK, params);
 
-  // 라우트별 응답 흉내
   if (url.includes('/api/postings/latest')) {
-    // 최신: 일단 필터만 적용, limit 적용
-    const limit = Number(params.limit ?? 10);
-    return filtered.slice(0, limit) as unknown as T;
+    // size 또는 limit 둘 다 허용
+    const limit = Number(params.limit ?? params.size ?? 10);
+    // 시작일 최신순(없으면 뒤로)
+    const sorted = [...filtered].sort(
+      (a, b) =>
+        (b.applyStartAt ? Date.parse(b.applyStartAt) : -Infinity) -
+        (a.applyStartAt ? Date.parse(a.applyStartAt) : -Infinity),
+    );
+    return sorted.slice(0, limit) as unknown as T;
   }
 
   if (url.includes('/api/postings/closing-soon')) {
-    // 마감 임박: 마감일 정렬 + limit
-    const limit = Number(params.limit ?? 10);
+    const limit = Number(params.limit ?? params.size ?? 10);
     return sortByClosingSoon(filtered).slice(0, limit) as unknown as T;
   }
 
   if (url.includes('/api/postings/category')) {
-    // 카테고리별: category 파라미터가 들어온다고 가정
     const category = (params.category ?? '').toString().toUpperCase();
     const page = Number(params.page ?? 0);
     const size = Number(params.size ?? 10);
-    const pageStart = page * size;
-
     const list = filtered.filter(
-      (n) => (n.category ?? '').toString().toUpperCase() === category
+      (n) => String(n.category ?? '').toUpperCase() === category,
     );
-    const content = list.slice(pageStart, pageStart + size);
-
-    // 백엔드의 페이징 응답 형태를 단순 흉내 (필요 시 너가 맞춰서 수정)
-    return {
-      content,
-      total: list.length,
-      page,
-      size,
-    } as unknown as T;
+    const start = page * size;
+    return list.slice(start, start + size) as unknown as T; // 배열 반환(훅들과 정합)
   }
 
-  // 기본: 전체 반환 (필요 시 페이지네이션 추가)
+  // 기본: 전체 반환
   return filtered as unknown as T;
+}
+
+export async function mockOrApiPost<T = any>(
+  url: string,
+  body?: any,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  if (!USE_MOCK) {
+    const res = await api.post<T>(url, body, config);
+    return res.data as T;
+  }
+  // 필요한 경우 POST 목업 분기 추가
+  return {} as T;
+}
+
+export async function mockOrApiPut<T = any>(
+  url: string,
+  body?: any,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  if (!USE_MOCK) {
+    const res = await api.put<T>(url, body, config);
+    return res.data as T;
+  }
+  return {} as T;
+}
+
+export async function mockOrApiDelete<T = any>(
+  url: string,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  if (!USE_MOCK) {
+    const res = await api.delete<T>(url, config);
+    return res.data as T;
+  }
+  return {} as T;
 }
 
 export default api;
